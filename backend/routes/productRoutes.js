@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
 const { protect, admin } = require('../middleware/authMiddleware');
+const upload = require('../utils/cloudinaryConfig');
 
 // Ruta para obtener todos los productos
 router.get('/', async (req, res) => {
@@ -35,6 +36,15 @@ router.post('/', protect, admin, async (req, res) => {
     } catch (error) {
         console.error(`Error al crear producto: ${error.message}`);
         res.status(400).json({ message: 'Error al crear producto' }); // Enviamos un error si algo sale mal
+    }
+});
+
+//Ruta para subir la imagen
+router.post('/upload', protect, admin, upload.single('image'), (req,res) => {
+    if(req.file && req.file.path) {
+        res.send(req.file.path); // Enviamos de vuelta la URL de Cloudinary
+    }else{
+        res.status(400).send({ message: 'Error al subir la imagen' });
     }
 });
 
