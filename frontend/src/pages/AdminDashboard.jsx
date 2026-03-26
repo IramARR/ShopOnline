@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const AdminDashboard = () => {
     const [products, setProducts] = useState([]);
@@ -34,7 +35,12 @@ const AdminDashboard = () => {
                 const { data } = await axios.put(`http://localhost:5000/api/products/${currentProductId}`, newProduct, config);
                 //Actualizamos la lista localmente
                 setProducts(products.map((p) => (p._id === currentProductId ? data : p)));
-                alert('Producto actualizado con exito');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Logrado!',
+                    text: 'El producto se guardo correctamente',
+                    confirmButtonColor: '#3b82f6',
+                });
             }else{
                 // Enviamos la peticion al servidor
                 const { data } = await axios.post('http://localhost:5000/api/products', newProduct, config);
@@ -42,7 +48,12 @@ const AdminDashboard = () => {
                 // Si todo sale bien:
                 setProducts([...products, data]); //Agregamos el nuevo a la tabla sin recargar
                 setShowModal(false);
-                alert('Nuevo producto agregado!');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Logrado!',
+                    text: 'El producto se creo correctamente',
+                    confirmButtonColor: '#3b82f6',
+                });
                 setNewProduct({
                     name: '',
                     price: 0,
@@ -54,35 +65,57 @@ const AdminDashboard = () => {
             }
             
         } catch (error) {
-            const message = error.response ? error.response.data.message : error.message;
-            alert('Error al crear: ' + message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.response?.data?.message || 'Algo salió mal',
+            });
             
         }
     }
 
     // Funcion provisional para borrar
-    const deleteHandler = async (id) => {
-        if( window.confirm("Estas seguro de eliminar este producto?")){
-            try {
-                // 1. Obtenemos el token del usuario logueado
-                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-                const config = {
-                    headers: {
-                        Authorization: `Bearer ${userInfo.token}`,
-                    },
-                };
+    const deleteHandler = (id) => {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¡No podrás revertir esto!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, borrarlo',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                try {
+                    // 1. Obtenemos el token del usuario logueado
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                    const config = {
+                        headers: {
+                            Authorization: `Bearer ${userInfo.token}`,
+                        },
+                    };
 
-                // 2. Peiticion DELETE al servidor
-                await axios.delete(`http://localhost:5000/api/products/${id}`,config);
+                    // 2. Peiticion DELETE al servidor
+                    axios.delete(`http://localhost:5000/api/products/${id}`,config);
 
-                // 3. Actualizamos el estado local para que el producto desaparezca de la tabla sin recargar
-                setProducts(products.filter((p) => p._id !== id));
-                alert('Producto eliminado');
-            } catch (error) {
-                const message = error.response ? error.response.data.message : error.message;
-                alert('Error al borrar: ' + message);
+                    // 3. Actualizamos el estado local para que el producto desaparezca de la tabla sin recargar
+                    setProducts(products.filter((p) => p._id !== id));
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Logrado!',
+                        text: 'El producto se elimino correctamente',
+                        confirmButtonColor: '#3b82f6',
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: error.response?.data?.message || 'Algo salió mal',
+                    });
+                }
             }
-        }
+        });
     };
 
     const editHandler = (product) => {
@@ -118,9 +151,16 @@ const AdminDashboard = () => {
             const { data } = await axios.post('http://localhost:5000/api/products/upload', formData, config);
             // 'data' sera la URL que nos mando Cloudinary
             setNewProduct({...newProduct, image: data});
-            alert('Imagen subida con exito');
+            Toast.fire({
+                icon: 'success',
+                title: 'Imagen lista en la nube'
+            });
         } catch (error) {
-            alert('Error al subir imagen' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.response?.data?.message || 'Algo salió mal',
+            });
         }
     };
 
@@ -137,6 +177,14 @@ const AdminDashboard = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [currentProductId, setCurrentProductId] = useState(null);
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+    });
 
     return(
         <div className='flex min-h-screen bg-slate-50 max-w-full overflow-x-hidden'>
