@@ -44,7 +44,7 @@ router.post('/upload', protect, admin, upload.single('image'), (req,res) => {
     if(req.file && req.file.path) {
         res.send(req.file.path); // Enviamos de vuelta la URL de Cloudinary
     }else{
-        res.status(400).send({ message: 'Error al subir la imagen' });
+        res.status(400).send({ message: 'Error al subir la imagen ' });
     }
 });
 

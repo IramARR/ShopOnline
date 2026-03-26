@@ -101,6 +101,30 @@ const AdminDashboard = () => {
         setShowModal(true);
     };
 
+    // Nueva funcion para manejar la subida al servidor
+    const uploadFileHandler = async (e) => {
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers:{
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`,
+                },
+            };
+            const { data } = await axios.post('http://localhost:5000/api/products/upload', formData, config);
+            // 'data' sera la URL que nos mando Cloudinary
+            setNewProduct({...newProduct, image: data});
+            alert('Imagen subida con exito');
+        } catch (error) {
+            alert('Error al subir imagen' + error.message);
+        }
+    };
+
+
     const [showModal, setShowModal] = useState(false);
     const [newProduct, setNewProduct] = useState({
         name: '',
@@ -228,6 +252,7 @@ const AdminDashboard = () => {
                                     />
                                 </div>
 
+                                {/* List Categoria */}
                                 <div className='col-span-2'>
                                     <label className='block text-sm font-medium text-slate-700 font-bold'>Categoria</label>
                                     <select 
@@ -262,7 +287,14 @@ const AdminDashboard = () => {
                                 {/* Imagenes */}
                                 <div>
                                     {/* Input image-link */}
-                                    <label className='block text-sm font-medium text-slate-700'>URL de la imagen</label>
+                                    <label className='block text-sm font-medium text-slate-700'>Imagen del producto</label>
+                                    {/* Subir archivos */}
+                                    <input 
+                                        type="file" 
+                                        className='mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
+                                        onChange={uploadFileHandler}                                    
+                                    />
+                                    {/* Subir links */}
                                     <input
                                         type='text'
                                         value={newProduct.image}
