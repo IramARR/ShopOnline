@@ -302,7 +302,7 @@ const AdminDashboard = () => {
 
                                 {/* List Categoria */}
                                 <div className='col-span-2'>
-                                    <label className='block text-sm font-medium text-slate-700 font-bold'>Categoria</label>
+                                    <label className='block text-sm font-medium text-slate-700'>Categoria</label>
                                     <select 
                                         className='w-full mt-1 p-2.5 border border-slate-200 rounded-xl outline-none bg-white focus:ring-2 focus:ring-blue-500'
                                         value={newProduct.category}
@@ -319,7 +319,7 @@ const AdminDashboard = () => {
 
                                 {/* Descripcion */}
                                 <div className='col-span-2'>
-                                    <label className='block text-sm font-medium text-slate-700 font-bold'>Descripcion</label>
+                                    <label className='block text-sm font-medium text-slate-700'>Descripcion</label>
                                     <textarea 
                                         
                                         className='w-full mt-1 p-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500'
