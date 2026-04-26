@@ -96,10 +96,32 @@ export const CartProvider = ({ children }) => {
         }
     };
 
+    const placeOrder = async (orderData) => {
+        if(!userInfo?.token) throw new Error("No hay sesión activa");
+
+        const config = {
+            headers: { 
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}` 
+            }
+        };
+
+        // Hacemos la peticion real al backend para disparar el correo
+        const { data } = await axios.post('/api/orders', orderData, config);
+        
+        // Si la orden se crea correctamente, limpiamos el carrito
+        setCart([]);
+        localStorage.removeItem('cartItems');
+        if(userInfo?.token){
+            await axios.post('/api/cart', { cartItems: [] }, config);
+        }
+        return data; // Devolvemos la data de la orden creada para mostrarla en la factura o detalles de la orden
+    }
+
     // ... Agrega aquí tu removeFromCart y clearCart siguiendo la misma lógica de syncCart
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, placeOrder }}>
             {children}
         </CartContext.Provider>
     );

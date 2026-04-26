@@ -62,6 +62,7 @@ router.delete('/:id', protect ,async (req, res) => {
     }
 });
 
+//Modificacion de un producto
 router.put('/:id', protect, admin, async (req, res) => {
     try {
         const { name, price, description, image, category, countInStock} = req.body;

@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom"; // Para redirigir al usuar
 
 const Cart = () => {
     // Extraemos la lista de productos y la funcion para limpiar el carrito del contexto
-    const { cart, clearCart, removeFromCart } = useCart();
+    const { cart, removeFromCart, placeOrder } = useCart();
 
     const navigate = useNavigate();
 
@@ -21,12 +21,30 @@ const Cart = () => {
     // Calculamos el total sumando el precio de cada producto en el carrito
     //const total = cart.reduce((acc, item) => acc + item.price, 0);
 
-    const handleCheckout = () => {
+    const handleCheckout = async () => {
         if(cart.length === 0) return;
-        const orderId = Math.floor(Math.random() * 1000000); // Generamos un ID de orden
-        alert(`¡Compra exitosa! Tu número de orden es: #CH-UX${orderId}. Gracias por comprar en TechShop`);
-        clearCart(); // Limpiamos el carrito despues de la compra
-        navigate('/'); // Redirigimos al usuario a la pagina principal
+        try {
+            const orderData = {
+                orderItems: cart,
+                shippingAddress: {
+                    address: "Calle Falsa 123",
+                    city: "Springfield",
+                    postalCode: "12345",
+                    country: "USA",
+                },
+                paymentMethod: "PayPal",
+                itemsPrice: cart.reduce((acc, item) => acc + item.price, 0),
+                taxPrice: 0,
+                shippingPrice: 0,
+                totalPrice: cart.reduce((acc, item) => acc + item.price, 0),
+            };
+            const createdOrder = await placeOrder(orderData);
+
+            alert(`¡Compra realizada con éxito! Tu numero de pedido es: ${createdOrder._id}`);
+            navigate('/'); // Redirige al usuario a la página principal después de la compra
+        } catch (error) {
+            alert(error.response?.data?.message || "Error al procesar la compra");
+        }
     };
 
     if(!userInfo) return null;

@@ -6,6 +6,8 @@ const cors = require('cors');
 require('dotenv').config();
 // Importamos la función para conectar a la base de datos
 const connectDB = require('./config/db');
+
+
 // Importamos las rutas de productos
 const productRoutes = require('./routes/productRoutes'); 
 
@@ -13,11 +15,18 @@ const userRoutes = require('./routes/userRoutes');
 
 const cartRoutes = require('./routes/cartRoutes');
 
+const orderRoutes = require('./routes/orderRoutes');
+
+
+
 // Inicializamos la aplicación Express
 const app = express();
 
 // Conectamos a la base de datos MongoDB
 connectDB();
+
+// Habilitamos el análisis de JSON en las solicitudes entrantes
+app.use(express.json());
 
 // MIDDLEWARES
 // Habilitamos CORS
@@ -31,14 +40,15 @@ app.use(cors({
 }));
 
 
-// Habilitamos el análisis de JSON en las solicitudes entrantes
-app.use(express.json());
+
 // Usamos las rutas de productos
 app.use('/api/products', productRoutes);
 
 app.use('/api/users', userRoutes);
 
 app.use('/api/cart', cartRoutes);
+
+app.use('/api/orders', orderRoutes);
 
 // Ruta de prueba para verificar que el servidor está funcionando
 app.get('/', (req, res) => {
