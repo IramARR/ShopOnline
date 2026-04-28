@@ -5,7 +5,18 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true},
     email: { type: String, required: true, unique: true},
     password: { type: String, required: true},
-    isAdmin: { type: Boolean, default: false}
+    isAdmin: { type: Boolean, default: false},
+    // Campos adicionales para direccion de envio
+    shippingAddress: {
+        address: { type: String },
+        city: { type: String },
+        postalCode: { type: String },
+        country: { type: String },
+        location: {
+            lat: { type: Number },
+            lng: { type: Number }
+        }
+    }
 }, { timestamps: true }); // <-- Indica cuando se creo y modifico
 
 // Metodo para encriptar antes de guardar

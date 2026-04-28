@@ -11,6 +11,51 @@ const generateToken = (id) => {
     });
 };
 
+
+//@desc Registrar un nuevo usuario
+//@route POST /api/users/register
+
+const registerUser = async (req, res) => {
+    const { name, email, password, shippingAddress } = req.body;
+
+    const userExists = await User.findOne({ email });
+
+    if(userExists){
+        return res.status(400).json({ message: 'El usuario ya existe '});
+    }
+
+    //Encriptamos la contrasena antes de guardar
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        //Guardamos la direccion que viene del frontend
+        shippingAddress: {
+            address: shippingAddress.address,
+            city: shippingAddress.city,
+            postalCode: shippingAddress.postalCode,
+            country: shippingAddress.country
+        }
+    });
+
+    if(user){
+        res.status(201).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            isAdmin: user.isAdmin,
+            shippingAddress: user.shippingAddress,
+            token: generateToken(user._id),
+        });
+    }else{
+        res.status(400).json({ message: 'Datos de usuario invalidos '});
+    }
+};
+
+
 // @desc Autenticar usuario y obtener token
 // @route POST /api/users/login
 // @access Public
@@ -20,6 +65,7 @@ const authUser = async (req, res) => {
 
     //2. Buscamos en la base de datos si existe alguien con ese email
     const user = await User.findOne({ email });
+
 
     //3. Si el usuario existe, comparamos la contrasena escrita con la de la BD
     //bcrypt.compare desencripta y compara de forma segura.
@@ -34,6 +80,7 @@ const authUser = async (req, res) => {
             email: user.email,
             isAdmin: user.isAdmin,
             // El TOKEN es como una firma digital que dura 30 dias
+            shippingAddress: user.shippingAddress,
             token: generateToken(user._id) // Aqui generamos el JWT
         });
     }else{
@@ -42,4 +89,4 @@ const authUser = async (req, res) => {
     }
 };
 
-module.exports = { authUser };
+module.exports = { authUser, registerUser };

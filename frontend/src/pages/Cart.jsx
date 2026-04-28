@@ -25,12 +25,18 @@ const Cart = () => {
         if(cart.length === 0) return;
         try {
             const orderData = {
-                orderItems: cart,
+                orderItems: cart.map(item => ({
+                    name: item.name,
+                    qty: item.qty || 1,
+                    image: item.image,
+                    price: item.price,
+                    product: item._id || item.product
+                })),
                 shippingAddress: {
-                    address: "Calle Falsa 123",
-                    city: "Springfield",
-                    postalCode: "12345",
-                    country: "USA",
+                    address: userInfo.shippingAddress?.address || "Direccion no especificada",
+                    city: userInfo.shippingAddress?.city || "Ciudad no especificada",
+                    postalCode: userInfo.shippingAddress?.postalCode || "Codigo postal no especificado",
+                    country: userInfo.shippingAddress?.country || "Pais no especificado",
                 },
                 paymentMethod: "PayPal",
                 itemsPrice: cart.reduce((acc, item) => acc + item.price, 0),
@@ -38,6 +44,8 @@ const Cart = () => {
                 shippingPrice: 0,
                 totalPrice: cart.reduce((acc, item) => acc + item.price, 0),
             };
+
+            console.log("Datos que se enviaran", orderData);
             const createdOrder = await placeOrder(orderData);
 
             alert(`¡Compra realizada con éxito! Tu numero de pedido es: ${createdOrder._id}`);
